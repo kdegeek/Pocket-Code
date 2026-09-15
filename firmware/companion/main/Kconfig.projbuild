@@ -1,0 +1,19 @@
+menu "T3 Companion runtime"
+
+config T3_COMPANION_ALLOW_TRUSTED_LAN
+    bool "Enable explicitly configured trusted-LAN companion transport"
+    default y
+    help
+        Permit plain HTTP/WS only after a user-configured local gateway and
+        remembered Wi-Fi network are present. This does not enable auto-join
+        on an unconfigured first boot.
+
+config T3_COMPANION_ALLOW_REMOTE
+    bool "Enable explicitly configured remote HTTPS companion transport"
+    default n
+    help
+        Permit HTTPS/WSS companion routes with strict certificate validation.
+        A remote image without a CA bundle or configured certificate fails
+        closed.
+
+endmenu

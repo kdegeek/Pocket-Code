@@ -1,0 +1,25 @@
+[
+  {
+    "commandId": "018f0000-0000-7000-8000-000000000001",
+    "status": "received",
+    "updatedAt": "2026-08-20T12:00:01.000Z"
+  },
+  {
+    "commandId": "018f0000-0000-7000-8000-000000000002",
+    "status": "committed",
+    "updatedAt": "2026-08-20T12:00:02.000Z",
+    "adapterSequence": 8
+  },
+  {
+    "commandId": "018f0000-0000-7000-8000-000000000003",
+    "status": "applied",
+    "updatedAt": "2026-08-20T12:00:03.000Z",
+    "adapterSequence": 9
+  },
+  {
+    "commandId": "018f0000-0000-7000-8000-000000000004",
+    "status": "rejected",
+    "updatedAt": "2026-08-20T12:00:04.000Z",
+    "error": "stale target context"
+  }
+]

@@ -1,0 +1,62 @@
+{
+  "manifestVersion": 1,
+  "protocolVersion": 1,
+  "fixtures": [
+    {
+      "path": "hello.json",
+      "sha256": "e78d03fe5198cfceff84e9d97298e7f72fce87657a9672e576215f32dba9c57f",
+      "size": 593
+    },
+    {
+      "path": "snapshot.json",
+      "sha256": "f67ce7a592d76d77f506037b4384c43ea93bc59ef5b40b1df03f847b84b9ea7c",
+      "size": 5074
+    },
+    {
+      "path": "pending-requests.json",
+      "sha256": "598ce73ecf759b4061a1f55cca652c028669c74433fb43d2991adfaf08914c2c",
+      "size": 1390
+    },
+    {
+      "path": "command-statuses.json",
+      "sha256": "a2b6feed963d56ef7c8e790d4c9dd005235004339fd748513302d04fe13b06e1",
+      "size": 636
+    },
+    {
+      "path": "audio-frame.bin",
+      "sha256": "345ba2d9fe652a52fecddcb2b0e4f4f0dd948fbc5ac389896d5abfcd636777f5",
+      "size": 30
+    },
+    {
+      "path": "usage-bridge.json",
+      "sha256": "35205ce861a3e4c6534e3582ec2ce091420a2888c8212e765562488cd1bb14a6",
+      "size": 3847
+    }
+  ],
+  "files": {
+    "hello.json": {
+      "sha256": "e78d03fe5198cfceff84e9d97298e7f72fce87657a9672e576215f32dba9c57f",
+      "size": 593
+    },
+    "snapshot.json": {
+      "sha256": "f67ce7a592d76d77f506037b4384c43ea93bc59ef5b40b1df03f847b84b9ea7c",
+      "size": 5074
+    },
+    "pending-requests.json": {
+      "sha256": "598ce73ecf759b4061a1f55cca652c028669c74433fb43d2991adfaf08914c2c",
+      "size": 1390
+    },
+    "command-statuses.json": {
+      "sha256": "a2b6feed963d56ef7c8e790d4c9dd005235004339fd748513302d04fe13b06e1",
+      "size": 636
+    },
+    "audio-frame.bin": {
+      "sha256": "345ba2d9fe652a52fecddcb2b0e4f4f0dd948fbc5ac389896d5abfcd636777f5",
+      "size": 30
+    },
+    "usage-bridge.json": {
+      "sha256": "35205ce861a3e4c6534e3582ec2ce091420a2888c8212e765562488cd1bb14a6",
+      "size": 3847
+    }
+  }
+}
