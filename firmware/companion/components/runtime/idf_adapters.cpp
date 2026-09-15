@@ -520,7 +520,10 @@ void IdfWebSocketClient::event_handler(void* arg, esp_event_base_t /*base*/, int
     } else if ((event->op_code & 0x8U) == 0U) {
       self->text_assembler_.reset();
     }
-  } else if (event_id == WEBSOCKET_EVENT_DISCONNECTED) {
+  } else if (event_id == WEBSOCKET_EVENT_DISCONNECTED ||
+             event_id == WEBSOCKET_EVENT_CLOSED) {
+    // A clean server shutdown emits CLOSED, not DISCONNECTED. Both must
+    // clear the live state and let the coordinator reconnect.
     self->text_assembler_.reset();
     if (self->closed_callback_) self->closed_callback_();
   }

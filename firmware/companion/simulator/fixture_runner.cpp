@@ -167,7 +167,7 @@ bool manifest_has_expected_hashes(const std::filesystem::path& root) {
       {"audio-frame.bin", "345ba2d9fe652a52fecddcb2b0e4f4f0dd948fbc5ac389896d5abfcd636777f5"},
       {"usage-bridge.json", "35205ce861a3e4c6534e3582ec2ce091420a2888c8212e765562488cd1bb14a6"},
   }};
-  for (const auto [name, expected_hash] : expected) {
+  for (const auto& [name, expected_hash] : expected) {
     bool file_ok = false;
     const std::string content = read_file(root / name, file_ok);
     if (!file_ok) { std::cerr << "fixture runner: missing " << name << '\n'; return false; }
