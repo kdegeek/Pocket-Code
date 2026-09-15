@@ -1,0 +1,166 @@
+{
+  "type": "snapshot",
+  "protocolVersion": 1,
+  "adapterSequence": 7,
+  "workItems": [
+    {
+      "environmentId": "environment-fixture",
+      "projectId": "project-fixture",
+      "threadId": "thread-needs-input",
+      "turnId": "turn-needs-input",
+      "projectName": "Companion",
+      "threadName": "Needs input",
+      "provider": "codex",
+      "model": "gpt-5",
+      "state": "needs_input",
+      "activity": "Waiting for your answer",
+      "updatedAt": "2026-08-20T12:01:00.000Z"
+    },
+    {
+      "environmentId": "environment-fixture",
+      "projectId": "project-fixture",
+      "threadId": "thread-failed",
+      "turnId": "turn-failed",
+      "projectName": "Companion",
+      "threadName": "Failed",
+      "provider": "claude",
+      "state": "failed",
+      "activity": "Provider exited with an error",
+      "updatedAt": "2026-08-20T11:59:00.000Z"
+    },
+    {
+      "environmentId": "environment-fixture",
+      "projectId": "project-fixture",
+      "threadId": "thread-blocked",
+      "turnId": "turn-blocked",
+      "projectName": "Companion",
+      "threadName": "Blocked",
+      "provider": "xai",
+      "state": "blocked",
+      "activity": "Provider is waiting",
+      "updatedAt": "2026-08-20T11:58:00.000Z"
+    },
+    {
+      "environmentId": "environment-fixture",
+      "projectId": "project-fixture",
+      "threadId": "thread-working",
+      "turnId": "turn-working",
+      "projectName": "Companion",
+      "threadName": "Working",
+      "provider": "codex",
+      "state": "working",
+      "activity": "Running tests",
+      "updatedAt": "2026-08-20T11:57:00.000Z"
+    },
+    {
+      "environmentId": "environment-fixture",
+      "projectId": "project-fixture",
+      "threadId": "thread-completed",
+      "turnId": "turn-completed",
+      "projectName": "Companion",
+      "threadName": "Completed",
+      "provider": "claude",
+      "state": "completed",
+      "activity": "Finished",
+      "updatedAt": "2026-08-20T11:56:00.000Z",
+      "completionSummary": "All checks passed"
+    },
+    {
+      "environmentId": "environment-fixture",
+      "projectId": "project-fixture",
+      "threadId": "thread-idle",
+      "projectName": "Companion",
+      "threadName": "Idle",
+      "provider": "xai",
+      "state": "idle",
+      "activity": "No active turn",
+      "updatedAt": "2026-08-20T11:55:00.000Z"
+    }
+  ],
+  "automaticFocusThreadId": "thread-needs-input",
+  "pendingRequests": [
+    {
+      "environmentId": "environment-fixture",
+      "projectId": "project-fixture",
+      "threadId": "thread-needs-input",
+      "expectedTurnId": "turn-needs-input",
+      "requestId": "request-approval",
+      "createdAt": "2026-08-20T12:00:00.000Z",
+      "provider": "codex",
+      "kind": "approval",
+      "requestKind": "command",
+      "detail": "Run the repository test command",
+      "availableDecisions": ["accept", "decline", "cancel"]
+    },
+    {
+      "environmentId": "environment-fixture",
+      "projectId": "project-fixture",
+      "threadId": "thread-input",
+      "expectedTurnId": "turn-input",
+      "requestId": "request-input",
+      "createdAt": "2026-08-20T12:01:00.000Z",
+      "provider": "claude",
+      "kind": "user_input",
+      "questions": [
+        {
+          "id": "question-scope",
+          "header": "Scope",
+          "question": "Which scope should be used?",
+          "options": [
+            { "label": "Read", "description": "Read-only access" },
+            { "label": "Write", "description": "Write access" }
+          ],
+          "multiSelect": false
+        },
+        {
+          "id": "question-targets",
+          "header": "Targets",
+          "question": "Which targets should be included?",
+          "options": [
+            { "label": "All", "description": "Every target" },
+            { "label": "Changed", "description": "Only changed files" }
+          ],
+          "multiSelect": true
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "observedAt": "2026-08-20T12:02:00.000Z",
+    "providers": [
+      {
+        "provider": "codex",
+        "status": "available",
+        "windows": [
+          { "period": "five_hour", "usedPercent": 42, "resetAt": "2026-08-20T15:00:00.000Z" },
+          { "period": "weekly", "usedPercent": 18, "resetAt": "2026-08-24T00:00:00.000Z" }
+        ],
+        "observedAt": "2026-08-20T12:02:00.000Z"
+      },
+      {
+        "provider": "claude",
+        "status": "stale",
+        "windows": [
+          { "period": "five_hour", "usedPercent": 64, "resetAt": "2026-08-20T14:00:00.000Z" },
+          { "period": "weekly", "usedPercent": 31, "resetAt": "2026-08-24T00:00:00.000Z" }
+        ],
+        "observedAt": "2026-08-20T11:40:00.000Z"
+      },
+      {
+        "provider": "xai",
+        "status": "unavailable",
+        "windows": [],
+        "observedAt": "2026-08-20T12:02:00.000Z"
+      }
+    ]
+  },
+  "connectivity": {
+    "status": "connected",
+    "lastConnectedAt": "2026-08-20T11:30:00.000Z",
+    "lastSeenAt": "2026-08-20T12:02:00.000Z"
+  },
+  "freshness": {
+    "observedAt": "2026-08-20T12:02:00.000Z",
+    "isStale": false
+  }
+}

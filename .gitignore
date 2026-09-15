@@ -19,3 +19,9 @@ host/node_modules/
 .claude/
 .vscode/
 .DS_Store
+.venv/
+host/companion-config.json
+firmware/companion/build*/
+firmware/companion/managed_components/
+firmware/companion/sdkconfig
+firmware/companion/sdkconfig.old

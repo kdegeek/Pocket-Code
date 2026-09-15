@@ -1,0 +1,47 @@
+[
+  {
+    "environmentId": "environment-fixture",
+    "projectId": "project-fixture",
+    "threadId": "thread-approval",
+    "expectedTurnId": "turn-approval",
+    "requestId": "request-approval",
+    "createdAt": "2026-08-20T12:00:00.000Z",
+    "provider": "codex",
+    "kind": "approval",
+    "requestKind": "command",
+    "detail": "Run the repository test command",
+    "availableDecisions": ["accept", "decline", "cancel"]
+  },
+  {
+    "environmentId": "environment-fixture",
+    "projectId": "project-fixture",
+    "threadId": "thread-input",
+    "expectedTurnId": "turn-input",
+    "requestId": "request-input",
+    "createdAt": "2026-08-20T12:01:00.000Z",
+    "provider": "claude",
+    "kind": "user_input",
+    "questions": [
+      {
+        "id": "question-scope",
+        "header": "Scope",
+        "question": "Which scope should be used?",
+        "options": [
+          { "label": "Read", "description": "Read-only access" },
+          { "label": "Write", "description": "Write access" }
+        ],
+        "multiSelect": false
+      },
+      {
+        "id": "question-targets",
+        "header": "Targets",
+        "question": "Which targets should be included?",
+        "options": [
+          { "label": "All", "description": "Every target" },
+          { "label": "Changed", "description": "Only changed files" }
+        ],
+        "multiSelect": true
+      }
+    ]
+  }
+]

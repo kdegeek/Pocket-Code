@@ -1,0 +1,27 @@
+{
+  "type": "hello",
+  "protocolVersion": 1,
+  "deviceId": "device-fixture-01",
+  "supportedVersions": {
+    "min": 1,
+    "max": 1
+  },
+  "lastAcceptedAdapterSequence": 0,
+  "pendingCommandIds": ["018f0000-0000-7000-8000-000000000001"],
+  "firmware": {
+    "version": "1.0.0",
+    "build": "fixture",
+    "hardware": "waveshare-round-esp32-s3"
+  },
+  "capabilities": {
+    "audio": {
+      "codec": "pcm_s16le",
+      "sampleRateHz": 16000,
+      "channels": 1,
+      "maxChunkBytes": 4096
+    },
+    "maxMessageBytes": 65536,
+    "maxPendingCommands": 32,
+    "maxPendingRequests": 16
+  }
+}

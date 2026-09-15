@@ -1,0 +1,7 @@
+/build/
+/build-host*/
+/managed_components/
+/sdkconfig
+/sdkconfig.old
+__pycache__/
+.pytest_cache/

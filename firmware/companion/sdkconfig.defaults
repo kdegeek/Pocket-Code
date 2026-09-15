@@ -1,0 +1,22 @@
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_PARTITION_TABLE_OFFSET=0x8000
+# This development image is explicitly LAN-only: it can pair with a manually
+# supplied private HTTP gateway, but remains unpaired and offline on first boot.
+CONFIG_T3_COMPANION_ALLOW_TRUSTED_LAN=y
+CONFIG_T3_COMPANION_ALLOW_REMOTE=n
+# The verified 1.75C module carries 8 MiB octal PSRAM.  The official BSP
+# allocates its LVGL draw buffers there; keep sensitive state in internal RAM.
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_TYPE_AUTO=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_BOOT_INIT=y
+CONFIG_SPIRAM_USE_MALLOC=y
+CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=16384
+CONFIG_SPIRAM_MALLOC_RESERVE_INTERNAL=32768
+# The verified BSP display startup has a deeper call chain than the IDF
+# default main task stack. The coordinator itself remains in static storage.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=12288

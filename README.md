@@ -1,4 +1,17 @@
-# TokenGenie
+# Pocket-Code
+
+## CodexBar companion integration
+
+The recovered Waveshare **ESP32-S3-Touch-AMOLED-1.75C** UI now has a Mac
+companion adapter that reads usage from the running CodexBar app. See
+[CodexBar setup](host/CODEXBAR.md) and the
+[recovered firmware source](firmware/companion/README.md).
+
+The earlier TokenGenie implementation below remains available for the
+original **1.75** board. Its Arduino firmware and `/usage` protocol differ
+from the recovered ESP-IDF **1.75C** companion.
+
+# TokenGenie (original implementation)
 
 A desk display that shows your **Claude Code** and **Codex** usage limits on a
 **Waveshare ESP32-S3-Touch-AMOLED-1.75** (466×466 round AMOLED).

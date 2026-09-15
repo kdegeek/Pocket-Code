@@ -1,0 +1,24 @@
+name: Companion
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  adapter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r host/requirements-companion.txt
+      - run: c++ -std=c++20 -Ifirmware/companion/components/companion_protocol/include host/tests/check_firmware_wire.cpp firmware/companion/components/companion_protocol/codec.cpp -o /tmp/pocket-code-wire-check
+      - run: PYTHONPATH=host POCKET_CODE_WIRE_CHECK=/tmp/pocket-code-wire-check python -m unittest discover -s host/tests
+  firmware-host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S firmware/companion/tests/host -B /tmp/companion-host
+      - run: cmake --build /tmp/companion-host --parallel 2
+      - run: ctest --test-dir /tmp/companion-host --output-on-failure
