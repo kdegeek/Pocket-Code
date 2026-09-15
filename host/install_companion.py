@@ -19,6 +19,14 @@ def _job_loaded(domain):
 
 
 def _bootstrap(domain, agent, loaded_was_true):
+    if loaded_was_true:
+        # bootout returns before an existing process has finished shutting down.
+        for _ in range(30):
+            if not _job_loaded(domain):
+                break
+            time.sleep(1)
+        else:
+            raise RuntimeError("Previous companion service did not finish shutting down")
     command = ["launchctl", "bootstrap", domain, str(agent)]
     result = subprocess.run(command)
     if result.returncode == 0:

@@ -119,7 +119,7 @@ class HostToolTests(unittest.TestCase):
                 "stale_seconds": 900,
             }))
             calls = []
-            print_results = iter((0, 1))
+            print_results = iter((0, 0, 1, 1))
             bootstrap_results = iter((5, 0))
 
             def fake_run(command, **kwargs):
@@ -140,7 +140,8 @@ class HostToolTests(unittest.TestCase):
             bootstrap_calls = [command for command, _ in calls
                                if command[:2] == ["launchctl", "bootstrap"]]
             self.assertEqual(len(bootstrap_calls), 2)
-            clock.sleep.assert_called_once_with(1)
+            self.assertEqual(clock.sleep.call_count, 2)
+            clock.sleep.assert_called_with(1)
 
 
 if __name__ == "__main__":
