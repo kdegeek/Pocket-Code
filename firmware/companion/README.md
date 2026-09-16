@@ -96,7 +96,9 @@ the ESP32-S3's supported 240 MHz CPU setting. After updating an existing local
 
 The LVGL worker owns touch acquisition. The application copies its completed
 state and point while holding the same display mutex; it never calls a second
-`lv_indev_read()` concurrently with the worker.
+`lv_indev_read()` concurrently with the worker. Startup brightness and lock/wake
+brightness commands also take this mutex because the SPI device does not support
+concurrent parameter and color transactions from different tasks.
 
 Daily and 30-day totals come from the existing CodexBar adapter's token summary.
 Missing or disconnected token data displays `--`; unavailable weekly windows

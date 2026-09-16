@@ -790,7 +790,11 @@ bool IdfBspPlatform::initialize() {
   display_config.touch_flags.mirror_y = 1;
   display_config.tear_avoid_mode = ESP_LV_ADAPTER_TEAR_AVOID_MODE_DEFAULT;
   if (!initialize_obsidian_panel(display_config, display_, input_)) return false;
+  // Brightness and drawing share one SPI device. Serialize panel commands too;
+  // concurrent command/colour transactions can deadlock the SPI driver.
+  if (bsp_display_lock(1000) != ESP_OK) return false;
   (void)bsp_display_brightness_set(70);
+  bsp_display_unlock();
   if (init_pkey_device()) {
     const bool pkey_configured = configure_pkey_device();
     // INTSTS2 is write-one-to-clear. Discard any boot/stale edge before the
@@ -942,7 +946,10 @@ bool IdfBspPlatform::render_enrollment_pairing(std::string_view enrollment_id,
 }
 
 bool IdfBspPlatform::set_display_power(bool on) {
-  return bsp_display_brightness_set(on ? 70 : 0) == ESP_OK;
+  if (!initialized_ || bsp_display_lock(1000) != ESP_OK) return false;
+  const bool ok = bsp_display_brightness_set(on ? 70 : 0) == ESP_OK;
+  bsp_display_unlock();
+  return ok;
 }
 
 bool IdfBspPlatform::wifi_start() { return wifi_.start(); }
