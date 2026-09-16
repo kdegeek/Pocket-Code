@@ -10,7 +10,8 @@ This directory preserves the recoverable ESP-IDF source used by the current
   8 MB PSRAM, with this image configured for a 16 MB logical flash layout.
 - Toolchain: ESP-IDF 5.5.5, as pinned by `dependencies.lock` and
   `main/idf_component.yml`.
-- The existing UI implementation is retained under `components/ui`.
+- The protocol/UI model remains under `components/ui`. The 1.75C now uses
+  the approved Obsidian usage face in `components/obsidian_display`.
 - The saved build metadata reports historical app version `f412029-dirty`;
   its `t3_companion_firmware` ELF/project prefix matches the saved artifact.
 
@@ -63,3 +64,47 @@ After reboot, `GET /api/companion/v1/provisioning` on the device should report
 `phase: "live"` and a nonzero `snapshot_sequence` matching the adapter's
 `lastSnapshotSequence` in `/healthz`. A successful hello alone does not prove
 that the firmware applied the data.
+
+## Obsidian usage face
+
+The 466×466 native LVGL view reproduces the approved Obsidian preview: a smoked
+glass center, three illuminated weekly usage rings, large daily token total,
+30-day token total, and colored Codex/OpenAI, Claude, and Grok glyphs. There is
+no heading, status dot, or box around each percentage. Labels sit clear of the
+inner ring. The provider order is Codex, Claude, Grok from outside inward and
+left to right.
+
+The background is baked from the approved browser preview; dynamic text and
+gradient arcs are rendered on-device. Ring updates ease to their new value over
+900 ms. Browser refraction and pointer-driven glass deformation are captured
+in the background rather than running React on the ESP32. All fonts and image
+assets are compiled into flash; the device downloads no assets.
+
+The board uses a persistent 12-line internal DMA draw buffer for partial
+refreshes. This avoids temporary SPI copies of the BSP's larger PSRAM buffers,
+which exhausted internal DMA memory during animated redraws with Wi-Fi active.
+
+Daily and 30-day totals come from the existing CodexBar adapter's token summary.
+Missing or disconnected token data displays `--`; unavailable weekly windows
+display `--` with an empty track. Weekly numbers and rings use the same weekly
+window (the legacy model's five-hour fields are not used by this face).
+Provisioning and enrollment retain their existing setup screens.
+
+### Render the actual native view on a Mac or Linux host
+
+After resolving the pinned ESP-IDF managed components once, the headless
+renderer uses the same LVGL view, fonts, image textures, and animation callbacks
+as the device:
+
+```sh
+cmake -S simulator/obsidian -B /tmp/pocket-code-obsidian -DCMAKE_BUILD_TYPE=Release
+cmake --build /tmp/pocket-code-obsidian --parallel
+/tmp/pocket-code-obsidian/obsidian_preview /tmp/obsidian.ppm
+/tmp/pocket-code-obsidian/obsidian_preview /tmp/obsidian-limits.ppm limits
+/tmp/pocket-code-obsidian/obsidian_preview /tmp/obsidian-unavailable.ppm unavailable
+/tmp/pocket-code-obsidian/obsidian_preview /tmp/obsidian-animation.ppm animation
+```
+
+The `limits` case exercises 0%, 100%, and a longer token count. The `animation`
+case advances LVGL's clock and captures the settled result. Asset provenance,
+licenses, and regeneration instructions live in `components/obsidian_assets`.

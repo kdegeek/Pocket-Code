@@ -37,6 +37,13 @@ struct ProviderRow {
   GlyphMetric xai;
 };
 
+struct TokenContent {
+  bool available = false;
+  std::string today_value = "--";
+  std::string today_unit;
+  std::string month_value = "--";
+};
+
 struct UiOptions {
   bool locked = false;
   bool protocol_incompatible = false;
@@ -49,6 +56,7 @@ struct UiModel {
   ViewState view_state = ViewState::Ambient;
   CenterContent center;
   ProviderRow provider_row;
+  TokenContent tokens;
   RingValues rings;
   PromptCardModel prompt;
   TranscriptCardModel transcript;

@@ -6,6 +6,7 @@
 
 #include "driver/gpio.h"
 #include "driver/i2s_std.h"
+#include "esp_attr.h"
 #include "esp_crt_bundle.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -33,6 +34,11 @@ constexpr std::uint8_t kAxpPkeyEnableMask = 0x0F;
 constexpr std::size_t kWifiSsidMax = 32;
 constexpr std::size_t kWifiPasswordMax = 64;
 constexpr std::size_t kProvisioningBodyMax = 2'048;
+// The BSP uses 50-line PSRAM draw buffers. SPI must allocate an internal DMA
+// copy of each such transfer; a wide animated redraw can fail after Wi-Fi and
+// audio have started. A small persistent DMA-capable buffer needs no bounce
+// allocation and LVGL's single-buffer flush handshake protects it until sent.
+DMA_ATTR static uint8_t obsidian_draw_buffer[466 * 12 * sizeof(uint16_t)];
 
 constexpr char kProvisioningHtml[] = R"HTML(<!doctype html>
 <html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -790,6 +796,10 @@ bool IdfBspPlatform::initialize() {
   display_config.tear_avoid_mode = ESP_LV_ADAPTER_TEAR_AVOID_MODE_DEFAULT;
   display_ = bsp_display_start_with_config(&display_config);
   if (display_ == nullptr) return false;
+  if (bsp_display_lock(1000) != ESP_OK) return false;
+  lv_display_set_buffers(display_, obsidian_draw_buffer, nullptr,
+                         sizeof(obsidian_draw_buffer), LV_DISPLAY_RENDER_MODE_PARTIAL);
+  bsp_display_unlock();
   input_ = bsp_display_get_input_dev();
   (void)bsp_display_brightness_set(70);
   if (init_pkey_device()) {
@@ -832,6 +842,7 @@ bool IdfBspPlatform::initialize() {
   // provisioning state until the first model render arrives.
   lv_obj_set_style_bg_color(screen, lv_color_hex(0x05070A), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, LV_PART_MAIN);
+  obsidian_display_.create(screen);
   title_label_ = lv_label_create(lv_screen_active());
   state_label_ = lv_label_create(lv_screen_active());
   activity_label_ = lv_label_create(lv_screen_active());
@@ -847,20 +858,7 @@ bool IdfBspPlatform::initialize() {
   lv_obj_align(activity_label_, LV_ALIGN_CENTER, 0, 8);
   lv_obj_align(provider_label_, LV_ALIGN_CENTER, 0, 48);
   lv_obj_align(note_label_, LV_ALIGN_CENTER, 0, 86);
-  for (int index = 0; index < 3; ++index) {
-    rings_[index] = lv_arc_create(lv_screen_active());
-    lv_obj_set_size(rings_[index], 410 - index * 36, 410 - index * 36);
-    lv_obj_center(rings_[index]);
-    lv_arc_set_bg_angles(rings_[index], 0, 360);
-    lv_arc_set_rotation(rings_[index], 270);
-    lv_obj_set_style_arc_color(rings_[index], lv_color_hex(0x1B2430), LV_PART_MAIN);
-    lv_obj_set_style_arc_opa(rings_[index], LV_OPA_COVER, LV_PART_MAIN);
-    lv_obj_set_style_arc_color(rings_[index],
-                               lv_color_hex(index == 0 ? 0x58A6FF
-                                                        : (index == 1 ? 0xE88962 : 0xF4F6F8)),
-                               LV_PART_INDICATOR);
-    lv_obj_set_style_arc_opa(rings_[index], LV_OPA_COVER, LV_PART_INDICATOR);
-  }
+  ESP_LOGI(kTag, "Obsidian display ready: 466x466, Inter, weekly provider glyphs");
   bsp_display_unlock();
   initialized_ = true;
   return true;
@@ -875,24 +873,32 @@ std::string IdfBspPlatform::device_id() const {
   return value;
 }
 
-void IdfBspPlatform::render_arcs(const t3::ui::UiModel& model) {
-  const std::array<double, 3> values = {
-      model.rings.codex.weekly.available && !model.rings.codex.weekly.stale
-          ? model.rings.codex.weekly.percent
-          : 0.0,
-      model.rings.claude.weekly.available && !model.rings.claude.weekly.stale
-          ? model.rings.claude.weekly.percent
-          : 0.0,
-      model.rings.xai.weekly.available && !model.rings.xai.weekly.stale
-          ? model.rings.xai.weekly.percent
-          : 0.0};
-  for (std::size_t index = 0; index < values.size(); ++index) {
-    if (rings_[index] != nullptr) lv_arc_set_value(rings_[index], static_cast<int>(values[index]));
-  }
-}
-
 bool IdfBspPlatform::render(const t3::ui::UiModel& model) {
-  if (!initialized_ || bsp_display_lock(100) != ESP_OK) return false;
+  // A full animated face refresh can hold the adapter longer than 100 ms on
+  // this SPI panel. Wait for that bounded transfer rather than marking a
+  // healthy connection faulted while LVGL is still completing its frame.
+  if (!initialized_ || bsp_display_lock(1000) != ESP_OK) return false;
+  const bool show_usage = model.view_state == t3::ui::ViewState::Ambient ||
+                          model.view_state == t3::ui::ViewState::Reconnecting;
+  obsidian_display_.set_visible(show_usage);
+  for (auto* label : {title_label_, state_label_, activity_label_, provider_label_, note_label_}) {
+    if (show_usage) lv_obj_add_flag(label, LV_OBJ_FLAG_HIDDEN);
+    else lv_obj_remove_flag(label, LV_OBJ_FLAG_HIDDEN);
+  }
+  if (show_usage) {
+    obsidian_display_.render(model);
+    if (!model.live_handshake) obsidian_live_logged_ = false;
+    if (model.live_handshake && !obsidian_live_logged_) {
+      ESP_LOGI(kTag, "Obsidian live: today=%s%s month=%s weekly=%s/%s/%s",
+               model.tokens.today_value.c_str(), model.tokens.today_unit.c_str(),
+               model.tokens.month_value.c_str(), model.rings.codex.weekly.display_text().c_str(),
+               model.rings.claude.weekly.display_text().c_str(),
+               model.rings.xai.weekly.display_text().c_str());
+      obsidian_live_logged_ = true;
+    }
+    bsp_display_unlock();
+    return true;
+  }
   std::string title;
   std::string state = model.center.state;
   std::string activity = model.center.activity;
@@ -917,7 +923,6 @@ bool IdfBspPlatform::render(const t3::ui::UiModel& model) {
   if (activity_label_ != nullptr) lv_label_set_text(activity_label_, activity.c_str());
   if (provider_label_ != nullptr) lv_label_set_text(provider_label_, providers.c_str());
   if (note_label_ != nullptr) lv_label_set_text(note_label_, note.c_str());
-  render_arcs(model);
   bsp_display_unlock();
   return true;
 }
@@ -934,6 +939,10 @@ bool IdfBspPlatform::render_enrollment_pairing(std::string_view enrollment_id,
   std::string activity = std::string(pairing_code);
   std::string provider = "ID " + std::string(enrollment_id);
   std::string note = "EXPIRES " + std::string(expires_at);
+  obsidian_display_.set_visible(false);
+  for (auto* label : {title_label_, state_label_, activity_label_, provider_label_, note_label_}) {
+    lv_obj_remove_flag(label, LV_OBJ_FLAG_HIDDEN);
+  }
   if (title_label_ != nullptr) lv_label_set_text(title_label_, title.c_str());
   if (state_label_ != nullptr) lv_label_set_text(state_label_, state.c_str());
   if (activity_label_ != nullptr) lv_label_set_text(activity_label_, activity.c_str());
