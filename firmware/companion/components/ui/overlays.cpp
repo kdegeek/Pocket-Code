@@ -14,17 +14,17 @@ OverlayModel overlay_for(ViewState state) {
       result = {OverlayTone::Info, "RECONNECTING", "Cached state is stale", true};
       break;
     case ViewState::Incompatible:
-      result = {OverlayTone::Error, "INCOMPATIBLE", "Update T3 Companion firmware", true};
+      result = {OverlayTone::Error, "INCOMPATIBLE", "Update Pocket-Code firmware", true};
       break;
     case ViewState::Prompt:
     case ViewState::BoundedChoice:
     case ViewState::Transcript:
       break;
     case ViewState::AppliedGlow:
-      result = {OverlayTone::Success, "APPLIED", "Acknowledged by T3", true};
+      result = {OverlayTone::Success, "APPLIED", "Acknowledged by gateway", true};
       break;
     case ViewState::RejectedGlow:
-      result = {OverlayTone::Error, "REJECTED", "T3 did not apply the action", true};
+      result = {OverlayTone::Error, "REJECTED", "Gateway did not apply the action", true};
       break;
     case ViewState::Provisioning:
       result = {OverlayTone::Info, "PROVISIONING", "Add a remembered network", true};

@@ -36,16 +36,16 @@ constexpr std::size_t kProvisioningBodyMax = 2'048;
 
 constexpr char kProvisioningHtml[] = R"HTML(<!doctype html>
 <html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>T3 Companion local setup</title>
+<title>Pocket-Code local setup</title>
 <style>body{font:16px system-ui,sans-serif;max-width:34rem;margin:2rem auto;padding:0 1rem;background:#05070a;color:#f4f6f8}label{display:block;margin:1rem 0 .25rem;color:#94a0b1}input,select,button{box-sizing:border-box;width:100%;padding:.7rem;border-radius:.4rem;border:1px solid #394452;background:#111820;color:#f4f6f8}button{margin-top:1.5rem;background:#2d7ff9;border:0;font-weight:600}small{color:#94a0b1}code{color:#58a6ff}</style>
-<h1>T3 Companion</h1><p>Local setup for <code>{{SSID}}</code> (open SoftAP).</p>
+<h1>Pocket-Code</h1><p>Local setup for <code>{{SSID}}</code> (open SoftAP).</p>
 <form action="/api/companion/v1/provisioning" method="post">
 <label for="ssid">Wi-Fi network (SSID)</label><input id="ssid" name="ssid" maxlength="32" required autocomplete="off">
 <label for="password">Wi-Fi password</label><input id="password" name="password" type="password" maxlength="64" autocomplete="off">
 <label for="gateway_url">Companion gateway origin (optional)</label><input id="gateway_url" name="gateway_url" placeholder="http://gateway.local" maxlength="256" autocomplete="off"><small>Leave blank to save Wi-Fi only.</small>
 <label for="transport">Gateway transport</label><select id="transport" name="transport"><option value="lan">Trusted LAN (HTTP/WS)</option><option value="remote">Remote (HTTPS/WSS)</option></select>
 <button type="submit">Save local setup</button></form>
-<p><small>This device does not store or display provider credentials, audio, transcripts, prompt answers, or raw enrollment tokens. After Wi-Fi is saved, complete pairing in T3 Code → Settings → Companion Devices → Add Device.</small></p>
+<p><small>Usage comes from CodexBar on your Mac. Saving Wi-Fi preserves existing pairing. The CodexBar adapter currently requires an already-enrolled device; see the Pocket-Code setup guide.</small></p>
 <p><a href="/api/companion/v1/provisioning" style="color:#58a6ff">View sanitized status</a></p>
 )HTML";
 
@@ -893,7 +893,7 @@ void IdfBspPlatform::render_arcs(const t3::ui::UiModel& model) {
 
 bool IdfBspPlatform::render(const t3::ui::UiModel& model) {
   if (!initialized_ || bsp_display_lock(100) != ESP_OK) return false;
-  std::string title = "T3 // ";
+  std::string title;
   std::string state = model.center.state;
   std::string activity = model.center.activity;
   std::string providers = model.provider_row.claude.glyph + " " +
@@ -929,8 +929,8 @@ bool IdfBspPlatform::render_enrollment_pairing(std::string_view enrollment_id,
       bsp_display_lock(100) != ESP_OK) {
     return false;
   }
-  std::string title = "T3 // PAIR DEVICE";
-  std::string state = "PAIR IN T3 CODE";
+  std::string title = "POCKET CODE // PAIR";
+  std::string state = "PAIR WITH GATEWAY";
   std::string activity = std::string(pairing_code);
   std::string provider = "ID " + std::string(enrollment_id);
   std::string note = "EXPIRES " + std::string(expires_at);

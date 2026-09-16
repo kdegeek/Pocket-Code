@@ -10,7 +10,7 @@ namespace {
 
 std::string provider_name(const std::optional<t3::companion::Provider>& provider) {
   if (!provider.has_value()) {
-    return "T3";
+    return "CodexBar";
   }
   switch (*provider) {
     case t3::companion::Provider::Codex:
@@ -20,7 +20,7 @@ std::string provider_name(const std::optional<t3::companion::Provider>& provider
     case t3::companion::Provider::Xai:
       return "xAI";
   }
-  return "T3";
+  return "CodexBar";
 }
 
 std::string state_name(t3::companion::WorkItemState state) {
@@ -76,17 +76,29 @@ UiModel compose_ui_model(const SnapshotModel& model, const FocusQueueState& focu
   result.rings = make_ring_values(usage);
   result.provider_row.claude = metric(result.rings.claude, "Claude", "5H", false);
   result.provider_row.codex = metric(result.rings.codex, "Codex", "5H", false);
-  result.provider_row.xai = metric(result.rings.xai, "xAI", "7D", true);
-  result.center = {"NO ACTIVE PROJECT", "Idle", "Waiting for T3 work", "T3"};
+  result.provider_row.xai = metric(result.rings.xai, "Grok", "7D", true);
+  result.center = {"CODEXBAR", "USAGE", "Waiting for usage data", "CodexBar"};
 
   if (const auto* item = focused_item(focus); item != nullptr) {
-    result.center.project = item->project_name.empty() ? "T3 PROJECT"
+    result.center.project = item->project_name.empty() ? "POCKET CODE"
                                                         : std::string(item->project_name.view());
     result.center.state = state_name(item->state);
     result.center.activity = item->activity.has_value() && !item->activity->empty()
                                  ? std::string(item->activity->view())
                                  : "Waiting for provider activity";
     result.center.provider = provider_name(item->provider);
+    // The adapter uses one synthetic work item to carry token totals. It does
+    // not represent an agent task, so never show Idle/Blocked as its status.
+    if (item->project_id.view() == "codexbar" && item->thread_id.view() == "usage-display") {
+      const bool available = result.provider_row.claude.available ||
+                             result.provider_row.codex.available ||
+                             result.provider_row.xai.available ||
+                             result.rings.codex.weekly.available ||
+                             result.rings.claude.weekly.available;
+      result.center.project = "CODEXBAR";
+      result.center.state = available ? "USAGE" : "NO DATA";
+      result.center.provider = "CodexBar";
+    }
   }
 
   result.prompt = make_prompt_card(interaction);

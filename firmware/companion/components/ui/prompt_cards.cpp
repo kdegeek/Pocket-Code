@@ -15,7 +15,7 @@ PromptCardModel make_prompt_card(const InteractionState& state) {
     result.kind = result.pending ? PromptCardKind::AwaitingAck : PromptCardKind::Approval;
     result.kicker = "APPROVAL REQUEST";
     result.title = request.detail.has_value() ? std::string(request.detail->view())
-                                               : "T3 needs your decision";
+                                               : "Decision requested";
     result.answer = "Run request";
     result.gesture_hint = "← deny · approve → · cancel ↓";
     return result;
@@ -24,7 +24,7 @@ PromptCardModel make_prompt_card(const InteractionState& state) {
   result.kind = result.pending ? PromptCardKind::AwaitingAck : PromptCardKind::Choice;
   result.kicker = "CHOOSE ONE";
   if (state.question_index >= request.questions.count) {
-    result.title = "T3 needs an answer";
+    result.title = "Answer requested";
     result.answer = "Submit selected";
     result.gesture_hint = "answer ↑ · cancel ↓";
     return result;

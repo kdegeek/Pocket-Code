@@ -134,6 +134,28 @@ void test_view_state_and_center_content() {
   expect(locked.view_state == ViewState::Locked, "locked presentation is explicit");
 }
 
+void test_codexbar_usage_is_not_an_agent_task() {
+  SnapshotModel model;
+  WorkItemRecord work;
+  work.item.thread_id = id("usage-display");
+  work.item.project_id = id("codexbar");
+  work.item.state = WorkItemState::Idle;
+  work.item.activity = ShortString{};
+  (void)work.item.activity->assign("Today 12.3M | 30d 456.7M tokens");
+  model.work_items.push_back(work);
+  model.connectivity.status = ConnectivityStatus::Connected;
+  model.live_handshake = true;
+  auto focus = make_focus_queue(model, 0);
+  auto interaction = make_interaction_state(true, "device");
+  const auto ui = compose_ui_model(model, focus, interaction, sample_usage());
+  expect(ui.center.project == "CODEXBAR" && ui.center.state == "USAGE",
+         "usage snapshot does not present a fake Idle agent task");
+  expect(ui.center.activity == "Today 12.3M | 30d 456.7M tokens",
+         "usage presentation retains actual token totals");
+  const auto unavailable = compose_ui_model(model, focus, interaction, UsageSnapshot{});
+  expect(unavailable.center.state == "NO DATA", "missing quotas have a data status");
+}
+
 void test_deterministic_framebuffer_and_pixel_shift() {
   SnapshotModel model;
   model.connectivity.status = ConnectivityStatus::Connected;
@@ -162,6 +184,7 @@ void test_deterministic_framebuffer_and_pixel_shift() {
 int main() {
   test_ring_contract_and_explicit_missing_values();
   test_view_state_and_center_content();
+  test_codexbar_usage_is_not_an_agent_task();
   test_deterministic_framebuffer_and_pixel_shift();
   if (failures != 0) {
     std::cerr << failures << " UI model test(s) failed\n";

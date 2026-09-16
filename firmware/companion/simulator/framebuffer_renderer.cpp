@@ -218,7 +218,7 @@ void draw_provider_row(Framebuffer& framebuffer, const ProviderRow& row) {
 
 void draw_center_content(Framebuffer& framebuffer, const UiModel& model) {
   draw_provider_row(framebuffer, model.provider_row);
-  draw_centered(framebuffer, "T3 // " + model.center.project, 157, 1, kKicker);
+  draw_centered(framebuffer, model.center.project, 157, 1, kKicker);
   draw_centered(framebuffer, model.center.state, 183, model.center.state.size() > 14U ? 2 : 3,
                 kWhite);
   draw_centered(framebuffer, model.center.activity, 226, 1, kMuted);
@@ -236,7 +236,7 @@ void draw_prompt(Framebuffer& framebuffer, const UiModel& model) {
                               std::to_string(model.prompt.count);
     draw_centered(framebuffer, count, 256, 1, kMuted);
   }
-  draw_centered(framebuffer, model.prompt.pending ? "PENDING T3 ACK" : model.prompt.gesture_hint,
+  draw_centered(framebuffer, model.prompt.pending ? "PENDING ACK" : model.prompt.gesture_hint,
                 313, 1, kMuted);
 }
 
