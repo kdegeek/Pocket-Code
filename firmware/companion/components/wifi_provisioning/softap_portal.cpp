@@ -10,7 +10,7 @@ bool SoftApPortal::begin(bool station_connected) {
     return false;
   }
   char name[20]{};
-  const int written = std::snprintf(name, sizeof(name), "T3-Companion-%04X", device_suffix_);
+  const int written = std::snprintf(name, sizeof(name), "Pocket-Code-%04X", device_suffix_);
   if (written <= 0 || static_cast<std::size_t>(written) >= sizeof(name)) {
     state_ = PortalState::Error;
     status_ = ProvisioningStatus::Error;

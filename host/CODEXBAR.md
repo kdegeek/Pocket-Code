@@ -21,7 +21,7 @@ change may require an adapter update.
 - Unavailable/stale data stays unavailable; missing quota windows are never
   converted into zero usage. Quota percentages cannot be converted to a count
   of remaining tokens.
-- The recovered UI still contains its original T3 title and idle status.
+- The display uses a CODEXBAR heading and USAGE / NO DATA status.
   This adapter provides usage only: no active turn, approval requests, or
   microphone target is advertised.
 

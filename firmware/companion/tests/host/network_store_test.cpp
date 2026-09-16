@@ -79,7 +79,7 @@ void test_softap_preserves_station_until_intentional_join_and_lifecycle() {
   (void)store.add_or_update("current", "current-pass");
   SoftApPortal portal(store, 0x1a2b);
   expect(portal.begin(true), "portal starts while station is connected");
-  expect(portal.ap_ssid() == "T3-Companion-1A2B", "setup AP name uses the device suffix");
+  expect(portal.ap_ssid() == "Pocket-Code-1A2B", "setup AP name uses the device suffix");
   expect(portal.station_preserved(), "starting setup preserves the current station");
   expect(portal.status() == ProvisioningStatus::Started, "portal emits started status");
   expect(portal.request_setup_join(), "setup join requires an explicit intent");

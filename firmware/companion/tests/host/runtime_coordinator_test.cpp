@@ -214,7 +214,7 @@ void test_unconfigured_first_boot_is_local_and_provisioning() {
   expect(platform.wifi_connects == 0 && websocket.opened_urls.empty() && http.requests == 0,
          "unconfigured boot makes no Wi-Fi, WebSocket, or HTTP gateway call");
   expect(!platform.provisioning_ssids.empty() &&
-             platform.provisioning_ssids.front().starts_with("T3-Companion-"),
+             platform.provisioning_ssids.front().starts_with("Pocket-Code-"),
          "first boot exposes the bounded local setup AP");
 }
 
