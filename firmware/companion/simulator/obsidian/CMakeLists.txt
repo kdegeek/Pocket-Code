@@ -26,3 +26,4 @@ target_include_directories(obsidian_preview PRIVATE
 target_link_libraries(obsidian_preview PRIVATE lvgl)
 enable_testing()
 add_test(NAME obsidian_ring_limits COMMAND obsidian_preview "${CMAKE_CURRENT_BINARY_DIR}/limits.ppm" limits)
+add_test(NAME obsidian_animation_damage COMMAND obsidian_preview "${CMAKE_CURRENT_BINARY_DIR}/animation-damage.ppm" animation-damage)

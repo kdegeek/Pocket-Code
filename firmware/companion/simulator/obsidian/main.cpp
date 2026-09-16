@@ -8,9 +8,13 @@
 
 namespace {
 std::array<uint16_t, 466 * 466> pixels{};
-std::array<uint16_t, 466 * 12> buffer{};
+// Match the board's full-size PSRAM composition buffer. The board presents
+// completed rectangles through a separate bounded internal-DMA buffer.
+std::array<uint16_t, 466 * 466> buffer{};
+size_t flushed_pixels = 0;
 
 void flush(lv_display_t* display, const lv_area_t* area, uint8_t* data) {
+  flushed_pixels += lv_area_get_size(area);
   const auto* source = reinterpret_cast<const uint16_t*>(data);
   for (int y = area->y1; y <= area->y2; ++y) {
     for (int x = area->x1; x <= area->x2; ++x) pixels[y * 466 + x] = *source++;
@@ -48,7 +52,29 @@ int main(int argc, char** argv) {
     model.rings.claude.weekly.percent = 100;
     model.rings.xai.weekly.percent = 99.9;
   }
-  face.render(model, mode == "animation");
+  if (mode == "animation-damage") {
+    auto empty = model;
+    empty.rings.codex.weekly.percent = 0;
+    empty.rings.claude.weekly.percent = 0;
+    empty.rings.xai.weekly.percent = 0;
+    face.render(empty, false);
+    lv_refr_now(display);
+    flushed_pixels = 0;
+    face.render(model, true);
+    lv_tick_inc(33);
+    lv_timer_handler();
+    lv_tick_inc(33);
+    lv_timer_handler();
+    // The first two small steps should update ring tips, not repaint most of
+    // the 466x466 face. Hiding zero-length arc objects violated this bound.
+    if (flushed_pixels == 0 || flushed_pixels >= 466U * 466U / 2U) {
+      std::cerr << "Animation startup repainted " << flushed_pixels << " pixels\n";
+      return 4;
+    }
+    std::cout << "Animation startup repainted only " << flushed_pixels << " pixels\n";
+  } else {
+    face.render(model, mode == "animation");
+  }
   // Exercise the actual LVGL animation path as well as the settled renderer.
   if (mode == "animation") {
     for (int elapsed = 0; elapsed < 1000; elapsed += 33) {

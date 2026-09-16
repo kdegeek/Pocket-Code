@@ -34,6 +34,7 @@ class ObsidianDisplay {
   lv_obj_t* month_ = nullptr;
   lv_obj_t* month_caption_ = nullptr;
   lv_obj_t* note_ = nullptr;
+  bool total_initialized_ = false;
   std::array<lv_obj_t*, 3> percentages_{};
   std::array<Ring, 3> rings_{};
 };

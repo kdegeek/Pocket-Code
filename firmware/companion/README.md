@@ -80,9 +80,23 @@ gradient arcs are rendered on-device. Ring updates ease to their new value over
 in the background rather than running React on the ESP32. All fonts and image
 assets are compiled into flash; the device downloads no assets.
 
-The board uses a persistent 12-line internal DMA draw buffer for partial
-refreshes. This avoids temporary SPI copies of the BSP's larger PSRAM buffers,
-which exhausted internal DMA memory during animated redraws with Wi-Fi active.
+The board composes each dirty rectangle once in a full-size RGB565 PSRAM buffer
+(434,312 bytes), then presents it through a persistent 12-line internal DMA
+buffer (11,184 bytes). Each DMA transfer completes before that staging buffer
+is reused; LVGL is released only after the complete rectangle has been sent.
+This avoids both temporary SPI allocations and repeatedly rendering the same
+scene for every 12-line strip. A transfer failure latches a display fault while
+retaining its DMA buffer, rather than rebooting or reusing memory still in flight.
+
+Zero-length arcs stay visible as transparent objects: toggling their hidden
+flag would invalidate the entire ring bounds at the first animation step. The
+build defaults enable LVGL style/radius caches, performance optimization, and
+the ESP32-S3's supported 240 MHz CPU setting. After updating an existing local
+`sdkconfig`, verify these settings there as defaults only seed new builds.
+
+The LVGL worker owns touch acquisition. The application copies its completed
+state and point while holding the same display mutex; it never calls a second
+`lv_indev_read()` concurrently with the worker.
 
 Daily and 30-day totals come from the existing CodexBar adapter's token summary.
 Missing or disconnected token data displays `--`; unavailable weekly windows
@@ -106,5 +120,17 @@ cmake --build /tmp/pocket-code-obsidian --parallel
 ```
 
 The `limits` case exercises 0%, 100%, and a longer token count. The `animation`
-case advances LVGL's clock and captures the settled result. Asset provenance,
+case advances LVGL's clock and captures the settled result. Run
+`ctest --test-dir /tmp/pocket-code-obsidian --output-on-failure` to also check that
+the first two animation steps update less than half the display; the old hidden
+flag behavior repainted 198,304 pixels and fails this guard. Asset provenance,
 licenses, and regeneration instructions live in `components/obsidian_assets`.
+
+Hardware verification on the 1.75C (2026-09-16) measured the previous large
+animation frames at 1.02–1.12 seconds. The revised cold three-ring transition
+peaked near 150 ms, then settled to 42–58 ms; a single-ring live update measured
+12–21 ms. These are render timings, not a guaranteed refresh rate. A temporary
+input diagnostic delivered 50 Down and 50 Up events through the production
+application reader without a panic, then restored the physical driver. Both
+timing and input probes were removed from the shipped image. Physical touch and
+perceived smoothness still require observation on the panel.

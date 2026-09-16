@@ -1,12 +1,12 @@
 #include "idf_adapters.hpp"
 
 #include "axp_pkey.hpp"
+#include "obsidian_panel.hpp"
 
 #include "bsp/esp32_s3_touch_amoled_1_75c.h"
 
 #include "driver/gpio.h"
 #include "driver/i2s_std.h"
-#include "esp_attr.h"
 #include "esp_crt_bundle.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -34,11 +34,6 @@ constexpr std::uint8_t kAxpPkeyEnableMask = 0x0F;
 constexpr std::size_t kWifiSsidMax = 32;
 constexpr std::size_t kWifiPasswordMax = 64;
 constexpr std::size_t kProvisioningBodyMax = 2'048;
-// The BSP uses 50-line PSRAM draw buffers. SPI must allocate an internal DMA
-// copy of each such transfer; a wide animated redraw can fail after Wi-Fi and
-// audio have started. A small persistent DMA-capable buffer needs no bounce
-// allocation and LVGL's single-buffer flush handshake protects it until sent.
-DMA_ATTR static uint8_t obsidian_draw_buffer[466 * 12 * sizeof(uint16_t)];
 
 constexpr char kProvisioningHtml[] = R"HTML(<!doctype html>
 <html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -794,13 +789,7 @@ bool IdfBspPlatform::initialize() {
   display_config.touch_flags.mirror_x = 1;
   display_config.touch_flags.mirror_y = 1;
   display_config.tear_avoid_mode = ESP_LV_ADAPTER_TEAR_AVOID_MODE_DEFAULT;
-  display_ = bsp_display_start_with_config(&display_config);
-  if (display_ == nullptr) return false;
-  if (bsp_display_lock(1000) != ESP_OK) return false;
-  lv_display_set_buffers(display_, obsidian_draw_buffer, nullptr,
-                         sizeof(obsidian_draw_buffer), LV_DISPLAY_RENDER_MODE_PARTIAL);
-  bsp_display_unlock();
-  input_ = bsp_display_get_input_dev();
+  if (!initialize_obsidian_panel(display_config, display_, input_)) return false;
   (void)bsp_display_brightness_set(70);
   if (init_pkey_device()) {
     const bool pkey_configured = configure_pkey_device();
@@ -877,7 +866,7 @@ bool IdfBspPlatform::render(const t3::ui::UiModel& model) {
   // A full animated face refresh can hold the adapter longer than 100 ms on
   // this SPI panel. Wait for that bounded transfer rather than marking a
   // healthy connection faulted while LVGL is still completing its frame.
-  if (!initialized_ || bsp_display_lock(1000) != ESP_OK) return false;
+  if (!initialized_ || !obsidian_panel_healthy() || bsp_display_lock(1000) != ESP_OK) return false;
   const bool show_usage = model.view_state == t3::ui::ViewState::Ambient ||
                           model.view_state == t3::ui::ViewState::Reconnecting;
   obsidian_display_.set_visible(show_usage);
@@ -1015,11 +1004,14 @@ bool IdfBspPlatform::read_pkey(std::uint8_t& edges) {
 }
 
 bool IdfBspPlatform::read_touch(RuntimeInputEvent& event) {
-  if (input_ == nullptr) return false;
-  lv_indev_read(input_);
+  // The adapter's LVGL task owns hardware reads and input processing. Calling
+  // lv_indev_read here races that task's global active-input state on a press.
+  // Only copy its completed sample, under the same mutex as the display task.
+  if (input_ == nullptr || bsp_display_lock(20) != ESP_OK) return false;
   const bool pressed = lv_indev_get_state(input_) == LV_INDEV_STATE_PRESSED;
   lv_point_t point{};
   lv_indev_get_point(input_, &point);
+  bsp_display_unlock();
   if (!pressed && !touch_pressed_) return false;
   event.kind = RuntimeInputKind::Touch;
   event.touch.phase = pressed ? (touch_pressed_ ? TouchPhase::Move : TouchPhase::Down)

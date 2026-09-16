@@ -1,5 +1,5 @@
 idf_component_register(
-  SRCS "runtime.cpp" "idf_adapters.cpp" "ws_text_assembler.cpp"
+  SRCS "runtime.cpp" "idf_adapters.cpp" "obsidian_panel.cpp" "ws_text_assembler.cpp"
   INCLUDE_DIRS "include"
   REQUIRES companion_protocol companion_state persistence wifi_provisioning transport
            ui obsidian_display touch_gestures buttons_power audio_capture board_waveshare

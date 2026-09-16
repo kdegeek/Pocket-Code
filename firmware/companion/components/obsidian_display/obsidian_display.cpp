@@ -122,8 +122,9 @@ void ObsidianDisplay::animate_ring(void* context, int32_t value) {
     // LVGL 9.5's image-backed arc mask treats 0 and 360 as the same angle.
     // A 359-degree textured arc closes seamlessly with its rounded 10px caps.
     lv_arc_set_value(obj, obj == ring.arc ? std::min<int32_t>(value, 999) : value);
-    if (value == 0) lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
-    else lv_obj_remove_flag(obj, LV_OBJ_FLAG_HIDDEN);
+    // A zero-length indicator already draws nothing. Hiding/showing the object
+    // invalidates its entire bounding square, turning the first tiny animation
+    // step into a full-face redraw and consuming the animation's time budget.
   }
   if (value == 0) lv_obj_add_flag(ring.glint, LV_OBJ_FLAG_HIDDEN);
   else lv_obj_remove_flag(ring.glint, LV_OBJ_FLAG_HIDDEN);
@@ -133,6 +134,8 @@ void ObsidianDisplay::animate_ring(void* context, int32_t value) {
 }
 
 void ObsidianDisplay::set_total(const std::string& value, const std::string& unit) {
+  if (total_initialized_ && value == lv_label_get_text(total_) && unit == lv_label_get_text(unit_)) return;
+  total_initialized_ = true;
   text(total_, value);
   text(unit_, unit);
   lv_obj_set_width(total_, LV_SIZE_CONTENT);
