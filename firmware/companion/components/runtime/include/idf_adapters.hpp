@@ -23,6 +23,7 @@
 #include "freertos/queue.h"
 #include "nvs.h"
 #include "lvgl.h"
+#include "obsidian_display.hpp"
 
 namespace t3::companion::runtime {
 
@@ -262,7 +263,6 @@ class IdfBspPlatform final : public RuntimePlatform {
   bool init_pkey_device();
   bool configure_pkey_device();
   bool clear_pkey_status(std::uint8_t status_mask);
-  void render_arcs(const t3::ui::UiModel& model);
 
   RuntimeInputQueue* input_queue_ = nullptr;
   IdfWifiStation wifi_;
@@ -275,7 +275,8 @@ class IdfBspPlatform final : public RuntimePlatform {
   lv_obj_t* activity_label_ = nullptr;
   lv_obj_t* provider_label_ = nullptr;
   lv_obj_t* note_label_ = nullptr;
-  lv_obj_t* rings_[3] = {nullptr, nullptr, nullptr};
+  pocket_code::ObsidianDisplay obsidian_display_;
+  bool obsidian_live_logged_ = false;
   esp_codec_dev_handle_t microphone_ = nullptr;
   bool initialized_ = false;
   bool audio_open_ = false;

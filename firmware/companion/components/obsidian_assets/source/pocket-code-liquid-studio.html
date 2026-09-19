@@ -1,0 +1,146 @@
+<div id="pc-liquid-studio" aria-label="Pocket-Code liquid glass design preview">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
+<style>
+#pc-liquid-studio{font-family:Inter,system-ui,sans-serif;color:light-dark(#263242,#d9e2ed);display:grid;justify-items:center;gap:20px;padding:12px 0 24px;-webkit-font-smoothing:antialiased}
+#pc-liquid-studio *{box-sizing:border-box}
+#pc-liquid-studio .studio-bar{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+#pc-liquid-studio .studio-bar button,#pc-liquid-studio .replay{font:500 13px Inter,system-ui,sans-serif;cursor:pointer;color:inherit;border:1px solid light-dark(#c4cfdb,#344354);background:transparent;border-radius:22px;padding:11px 19px;transition:background .2s,border-color .2s}
+#pc-liquid-studio .studio-bar button[aria-pressed=true]{background:light-dark(#e3eaf3,#253143);border-color:light-dark(#a8b8cc,#68798e)}
+#pc-liquid-studio button:disabled{opacity:.55;cursor:default}
+#pc-liquid-studio .viewport{position:relative;width:min(100%,480px);aspect-ratio:1;isolation:isolate;filter:drop-shadow(0 18px 25px #0005)}
+#pc-liquid-studio .stage{width:466px;height:466px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(var(--pc-fit,1));border-radius:50%;overflow:hidden;background:#03070e;color:#f2f6fc;box-shadow:inset 0 0 0 1px #b8d3f244,inset 0 0 0 4px #0c101a,inset 0 0 0 5px #9ab4d91a;touch-action:manipulation}
+#pc-liquid-studio .atmosphere{position:absolute;inset:5px;border-radius:50%;background:radial-gradient(ellipse at 28% 15%,#31516c80,transparent 56%),radial-gradient(ellipse at 72% 81%,#6f42283d,transparent 43%),radial-gradient(ellipse at 18% 76%,#17477933,transparent 50%),linear-gradient(135deg,#131d2b,#070e18 65%);transition:background .5s}
+#pc-liquid-studio .stage[data-finish=crystal] .atmosphere{background:radial-gradient(ellipse at 28% 15%,#7893af80,transparent 56%),radial-gradient(ellipse at 72% 81%,#96684655,transparent 43%),radial-gradient(ellipse at 18% 76%,#2e658c66,transparent 50%),linear-gradient(135deg,#283449,#0d1724 65%)}
+#pc-liquid-studio .light-ribbon{pointer-events:none;position:absolute;left:62px;top:73px;width:270px;height:149px;border-radius:50%;transform:rotate(-32deg);background:radial-gradient(ellipse at 50% 95%,#e2ecff1c,transparent 68%);border-bottom:1px solid #dbe9ff17;box-shadow:0 9px 20px #c9dfff05}
+#pc-liquid-studio .light-ribbon.two{left:136px;top:202px;width:224px;height:145px;transform:rotate(-37deg);opacity:.5;border-color:#e1af7626;background:radial-gradient(ellipse at 50% 95%,#edb37a12,transparent 68%)}
+#pc-liquid-studio .ring-art{position:absolute;inset:0;width:466px;height:466px;pointer-events:none;overflow:visible}
+#pc-liquid-studio .lens-mount{position:absolute;inset:0;pointer-events:none}
+#pc-liquid-studio .lens-mount>.liquid-center{pointer-events:auto}
+#pc-liquid-studio .lens-mount>span,#pc-liquid-studio .lens-mount>div{width:288px!important;height:288px!important}
+#pc-liquid-studio .liquid-center>svg{width:288px!important;height:288px!important;inset:0;pointer-events:none}
+#pc-liquid-studio .relative{position:relative}
+#pc-liquid-studio .pointer-events-none{pointer-events:none}
+#pc-liquid-studio .bg-black{background:#000}
+#pc-liquid-studio .opacity-0{opacity:0}
+#pc-liquid-studio .opacity-20{opacity:.2}
+#pc-liquid-studio .opacity-100{opacity:1}
+#pc-liquid-studio .mix-blend-overlay{mix-blend-mode:overlay}
+#pc-liquid-studio .liquid-center{width:288px;height:288px;border-radius:50%;clip-path:circle(50% at 50% 50%)}
+#pc-liquid-studio .liquid-center>.glass{width:288px;height:288px;display:flex!important;justify-content:center;border:1px solid #c5e3ff26;background:linear-gradient(146deg,#b4d4ed0c,#1022361e 30%,#030b1738 80%);box-shadow:inset 0 1px 1px #f1f7ff24,inset 0 -1px 1px #829dc51c,0 10px 28px #0004!important}
+#pc-liquid-studio .liquid-center>.glass>.glass__warp{pointer-events:none}
+#pc-liquid-studio .liquid-center>.glass>div{width:100%;height:100%;font:400 14px Inter,system-ui,sans-serif!important;text-shadow:0 1px 8px #02091255!important}
+#pc-liquid-studio .lens-content{height:288px;width:288px;position:relative;display:flex;align-items:center;flex-direction:column;padding-top:32px;text-align:center;user-select:none}
+#pc-liquid-studio .total{margin-top:0;font-size:84px;line-height:1.05;font-weight:400;letter-spacing:-4px;color:#f4f8ff;font-variant-numeric:tabular-nums;white-space:nowrap}
+#pc-liquid-studio .total .unit{font-size:34px;letter-spacing:-.5px;margin-left:4px;color:#b5c8dd;font-weight:400}
+#pc-liquid-studio .today{font-size:18px;letter-spacing:.05px;margin-top:6px;color:#a9bed4}
+#pc-liquid-studio .period{font-size:17px;margin-top:14px;color:#d6e2f0;letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+#pc-liquid-studio .period span{color:#9bafc6;margin-left:5px}
+#pc-liquid-studio .metrics{display:grid;grid-template-columns:repeat(3,72px);gap:5px;margin-top:12px}
+#pc-liquid-studio .metric{height:51px;display:flex;flex-direction:column;gap:7px;align-items:center;justify-content:center;position:relative}
+#pc-liquid-studio .metric-name{font-size:14px;color:#b4c6d9;font-weight:400;display:flex;gap:5px;align-items:center;white-space:nowrap}
+#pc-liquid-studio .provider-glyph{display:inline-block;width:18px;height:18px;flex:none;background:var(--pc-provider);mask:var(--pc-icon) center/contain no-repeat;-webkit-mask:var(--pc-icon) center/contain no-repeat}
+#pc-liquid-studio .provider-codex{--pc-provider:#91caff;--pc-icon:url('https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.0/icons/openai.svg')}
+#pc-liquid-studio .provider-claude{--pc-provider:#e8b595;--pc-icon:url('https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.0/icons/claude.svg')}
+#pc-liquid-studio .provider-grok{--pc-provider:#d5e4f6;--pc-icon:url('https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.0/icons/grok.svg')}
+#pc-liquid-studio .metric-value{font-size:22px;letter-spacing:-.6px;line-height:1;color:#eef5ff;font-variant-numeric:tabular-nums;font-weight:400}
+#pc-liquid-studio .footnote{font-size:11px;letter-spacing:1.3px;color:#8fa6bd;margin-top:5px}
+#pc-liquid-studio .fallback-lens{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:288px;height:288px;border-radius:50%;background:linear-gradient(145deg,#31445ddd,#0a1422ed);border:1px solid #adc9e133}
+#pc-liquid-studio .sweep{position:absolute;inset:64px;pointer-events:none;border-radius:50%;opacity:0;mix-blend-mode:screen;background:linear-gradient(115deg,transparent 30%,#bedcff03 44%,#bedcff26 50%,#bedcff03 56%,transparent 70%);transform:translateX(-100px);filter:blur(3px)}
+#pc-liquid-studio .fineprint{font:400 11px/1.5 Inter,system-ui,sans-serif;color:light-dark(#52647b,#98aabe);text-align:center;max-width:95%}
+#pc-liquid-studio .load-note{font:400 12px/1.5 Inter,system-ui,sans-serif;color:light-dark(#52647b,#98aabe)}
+#pc-liquid-studio .update-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center}
+@media(prefers-reduced-motion:reduce){#pc-liquid-studio *{transition:none!important}}
+</style>
+<div class="studio-bar" role="group" aria-label="Glass finish">
+<button type="button" data-finish="obsidian" aria-pressed="true">Obsidian</button>
+<button type="button" data-finish="crystal" aria-pressed="false">Crystal</button>
+</div>
+<div class="viewport" aria-label="Interactive glass face, with sample Codex, Claude, and Grok usage">
+  <div class="stage" data-finish="obsidian">
+    <div class="atmosphere"></div><div class="light-ribbon"></div><div class="light-ribbon two"></div>
+    <svg class="ring-art" viewBox="0 0 466 466" role="img" aria-label="Weekly usage: Codex 31 percent, Claude 55 percent, Grok 6 percent">
+      <defs>
+        <linearGradient id="pcs-track" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#788ca229"/><stop offset=".4" stop-color="#7894b014"/><stop offset="1" stop-color="#27344740"/></linearGradient>
+        <linearGradient id="pcs-codex" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c4edff"/><stop offset=".22" stop-color="#8ac7ff"/><stop offset=".55" stop-color="#4c96e4"/><stop offset="1" stop-color="#82bcea"/></linearGradient>
+        <linearGradient id="pcs-claude" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8dfcc"/><stop offset=".28" stop-color="#eabc9f"/><stop offset=".62" stop-color="#be8669"/><stop offset="1" stop-color="#efd0b5"/></linearGradient>
+        <linearGradient id="pcs-grok" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f1f8ff"/><stop offset=".55" stop-color="#b9ccdf"/><stop offset="1" stop-color="#7e95ad"/></linearGradient>
+        <linearGradient id="pcs-edge" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e6f6ff" stop-opacity=".72"/><stop offset=".35" stop-color="#c9e2ff" stop-opacity=".12"/><stop offset=".7" stop-color="#c8e1ff" stop-opacity=".04"/><stop offset="1" stop-color="#cfe6ff" stop-opacity=".26"/></linearGradient>
+      </defs>
+      <circle cx="233" cy="233" r="226" stroke="url(#pcs-edge)" stroke-width=".6" fill="none"/>
+      <g id="pcs-rings"></g>
+    </svg>
+    <div class="lens-mount" id="pcs-react-lens">
+      <div class="fallback-lens"><div class="lens-content"><div class="total">75.5<span class="unit">M</span></div><div class="today">tokens today</div><div class="period">2.87B<span>in 30 days</span></div><div class="metrics"><div class="metric provider-codex"><div class="metric-name"><span class="provider-glyph" aria-hidden="true"></span>Codex</div><div class="metric-value">31%</div></div><div class="metric provider-claude"><div class="metric-name"><span class="provider-glyph" aria-hidden="true"></span>Claude</div><div class="metric-value">55%</div></div><div class="metric provider-grok"><div class="metric-name"><span class="provider-glyph" aria-hidden="true"></span>Grok</div><div class="metric-value">6%</div></div></div><div class="footnote">WEEKLY USAGE</div></div></div>
+    </div>
+    <div class="sweep" id="pcs-sweep"></div>
+  </div>
+</div>
+<div class="update-row"><button type="button" class="replay" id="pcs-update">Preview an update</button><span class="load-note" id="pcs-status" aria-live="polite">Loading glass…</span></div>
+<div class="fineprint">Design preview · Sample data · Move over the glass to explore the light</div>
+<script>
+(() => {
+ const root=document.getElementById('pc-liquid-studio');
+ const stage=root.querySelector('.stage'), viewport=root.querySelector('.viewport');
+ const state={finish:'obsidian',refraction:28,frost:.08,elasticity:.12,duration:900};
+ const base=[{r:209,p:31,id:'codex'},{r:187,p:55,id:'claude'},{r:165,p:6,id:'grok'}];
+ const ns='http://www.w3.org/2000/svg';
+ function svg(name,attrs){const el=document.createElementNS(ns,name);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el;}
+ function path(r,p){const a=p/100*Math.PI*2;return `M233 ${233-r} A${r} ${r} 0 ${p>50?1:0} 1 ${233+r*Math.sin(a)} ${233-r*Math.cos(a)}`;}
+ const paths=base.map(({r,p,id})=>{
+  const g=root.querySelector('#pcs-rings');
+  g.append(svg('circle',{cx:233,cy:235,r,fill:'none',stroke:'#0008','stroke-width':12}));
+  g.append(svg('circle',{cx:233,cy:233,r,fill:'none',stroke:'url(#pcs-track)','stroke-width':10}));
+  const glow=svg('path',{d:path(r,p),fill:'none',stroke:`url(#pcs-${id})`,'stroke-width':17,opacity:.065,'stroke-linecap':'round'});
+  const arc=svg('path',{d:path(r,p),fill:'none',stroke:`url(#pcs-${id})`,'stroke-width':10,'stroke-linecap':'round'});
+  const edge=svg('path',{d:path(r,p),fill:'none',stroke:'url(#pcs-edge)','stroke-width':1.2,'stroke-linecap':'round',transform:'translate(-.4 -2.6)'});
+  const cap=svg('circle',{cx:233+r*Math.sin(p/100*Math.PI*2),cy:233-r*Math.cos(p/100*Math.PI*2),r:2.3,fill:'#eaf6ff',opacity:.52});
+  g.append(glow,arc,edge,cap);return{r,glow,arc,edge,cap};
+ });
+ const resize=()=>stage.style.setProperty('--pc-fit',viewport.clientWidth/466);
+ new ResizeObserver(resize).observe(viewport);resize();
+ let data={total:75.5,quotas:[31,55,6]},applyGlass=()=>{},next=0,running=false;
+ const status=root.querySelector('#pcs-status'),button=root.querySelector('#pcs-update');
+ function paint(){paths.forEach(({r,glow,arc,edge,cap},i)=>{const p=data.quotas[i],d=path(r,p),a=p/100*Math.PI*2;[glow,arc,edge].forEach(e=>e.setAttribute('d',d));cap.setAttribute('cx',233+r*Math.sin(a));cap.setAttribute('cy',233-r*Math.cos(a));});applyGlass();}
+ function render(){stage.dataset.finish=state.finish;root.querySelectorAll('[data-finish]').forEach(b=>{if(b.tagName==='BUTTON')b.setAttribute('aria-pressed',String(b.dataset.finish===state.finish));});applyGlass();}
+ root.querySelectorAll('button[data-finish]').forEach(b=>b.addEventListener('click',()=>{state.finish=b.dataset.finish;render();}));
+ button.addEventListener('click',()=>{
+  if(running)return;running=true;button.disabled=true;
+  const from={total:data.total,quotas:[...data.quotas]};next=1-next;
+  const to=next?{total:78.1,quotas:[35,56,7]}:{total:75.5,quotas:[31,55,6]};
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,duration=reduced?0:state.duration,start=performance.now();
+  status.textContent='Updating sample usage';
+  function frame(now){const t=duration===0?1:Math.min(1,(now-start)/duration),e=1-Math.pow(1-t,4);
+   data={total:from.total+(to.total-from.total)*e,quotas:from.quotas.map((v,i)=>v+(to.quotas[i]-v)*e)};paint();
+   const sweep=root.querySelector('#pcs-sweep');sweep.style.opacity=reduced?'0':String(Math.sin(t*Math.PI)*.65);sweep.style.transform=`translateX(${-110+t*220}px)`;
+   if(t<1)requestAnimationFrame(frame);else{running=false;button.disabled=false;status.textContent='Sample update complete';root.querySelector('.ring-art').setAttribute('aria-label',`Weekly usage: Codex ${to.quotas[0]} percent, Claude ${to.quotas[1]} percent, Grok ${to.quotas[2]} percent`);}
+  }requestAnimationFrame(frame);
+ });
+ root.pcPreview={state,getData:()=>data,install:(renderer)=>{applyGlass=renderer;render();status.textContent='Liquid glass ready';root.dataset.engine='liquid-glass-react';},render};
+ render();
+ if(globalThis.Tweak){const tweak=new Tweak({container:viewport,onChange:render});tweak.addSelect(state,'finish',{label:'Glass finish',options:[{label:'Obsidian',value:'obsidian'},{label:'Crystal',value:'crystal'}]});tweak.addSlider(state,'refraction',{label:'Edge refraction',min:5,max:55});tweak.addSlider(state,'frost',{label:'Frosting',min:0,max:.4,step:.02});tweak.addSlider(state,'elasticity',{label:'Elastic response',min:0,max:.25,step:.01});tweak.addSlider(state,'duration',{label:'Update motion',min:400,max:1200,step:50,unit:'ms'});}
+})();
+</script>
+<script type="module">
+import React from 'https://esm.sh/react@19.1.0';
+import {createRoot} from 'https://esm.sh/react-dom@19.1.0/client?deps=react@19.1.0';
+import LiquidGlass from 'https://esm.sh/liquid-glass-react@1.1.1?deps=react@19.1.0';
+const root=document.getElementById('pc-liquid-studio'),controller=root.pcPreview,h=React.createElement;
+const mount=createRoot(root.querySelector('#pcs-react-lens'));
+const faceRef={current:root.querySelector('.stage')};
+function paint(){
+ const {state}=controller,data=controller.getData(),crystal=state.finish==='crystal';
+ const content=h('div',{className:'lens-content'},
+  h('div',{className:'total'},h('span',{id:'pcs-total'},data.total.toFixed(1)),h('span',{className:'unit'},'M')),
+  h('div',{className:'today'},'tokens today'),
+  h('div',{className:'period'},'2.87B',h('span',null,'in 30 days')),
+  h('div',{className:'metrics'},...['Codex','Claude','Grok'].map((name,i)=>h('div',{className:'metric provider-'+name.toLowerCase(),key:name},h('div',{className:'metric-name'},h('span',{className:'provider-glyph','aria-hidden':true}),name),h('div',{className:'metric-value'},Math.round(data.quotas[i])+'%')))),
+  h('div',{className:'footnote'},'WEEKLY USAGE'));
+ mount.render(h(LiquidGlass,{className:'liquid-center',style:{position:'absolute',left:'50%',top:'50%',width:'288px',height:'288px'},padding:'0px',cornerRadius:144,displacementScale:state.refraction,blurAmount:crystal?state.frost*.45:state.frost,saturation:crystal?135:110,aberrationIntensity:1.15,elasticity:matchMedia('(prefers-reduced-motion: reduce)').matches?0:state.elasticity,mouseContainer:faceRef,mode:'polar'},content));
+}
+controller.install(paint);
+</script>
+<!-- Uses liquid-glass-react 1.1.1 (MIT), Copyright (c) 2025 Max Rovensky.
+MIT License: Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the Software), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Inter is licensed under SIL OFL 1.1: https://github.com/rsms/inter/blob/master/LICENSE.txt
+Provider glyphs: @lobehub/icons-static-svg 1.95.0 (MIT), https://github.com/lobehub/lobe-icons -->
+</div>
