@@ -326,6 +326,11 @@ class RuntimeCoordinator {
   RuntimeError last_error_;
   Backoff reconnect_backoff_;
   std::uint64_t next_connect_ms_ = 0;
+  // One asynchronous station join may be outstanding. The driver accepts a
+  // join for an out-of-range network, so only this deadline can fail it.
+  std::uint64_t wifi_join_deadline_ms_ = 0;
+  std::string wifi_join_ssid_;
+  bool wifi_join_pending_ = false;
   std::uint64_t boot_started_ms_ = 0;
   bool offline_health_reported_ = false;
   bool booted_ = false;
