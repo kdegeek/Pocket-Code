@@ -326,7 +326,9 @@ bool IdfWifiStation::connect(std::string_view ssid, std::string_view password) {
   std::memcpy(config.sta.password, password.data(), password.size());
   config.sta.threshold.authmode = password.empty() ? WIFI_AUTH_OPEN : WIFI_AUTH_WPA2_PSK;
   connected_ = false;
-  return esp_wifi_set_mode(WIFI_MODE_STA) == ESP_OK &&
+  // Keep an advertised setup AP reachable while remembered networks are
+  // retried; dropping to station-only mode would close the setup portal.
+  return esp_wifi_set_mode(ap_active_ ? WIFI_MODE_APSTA : WIFI_MODE_STA) == ESP_OK &&
          esp_wifi_set_config(WIFI_IF_STA, &config) == ESP_OK && esp_wifi_connect() == ESP_OK;
 }
 
@@ -344,7 +346,8 @@ bool IdfWifiStation::start_provisioning_ap(std::string_view ssid) {
     return false;
   }
   const auto result = esp_wifi_start();
-  return result == ESP_OK || result == ESP_ERR_INVALID_STATE;
+  ap_active_ = result == ESP_OK || result == ESP_ERR_INVALID_STATE;
+  return ap_active_;
 }
 
 HttpResponse IdfHttpClient::get(std::string_view url, std::string_view bearer_token) {

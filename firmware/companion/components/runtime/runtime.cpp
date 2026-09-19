@@ -61,6 +61,9 @@ AudioStreamId stream_id_for(std::uint64_t now_ms, std::string_view device_id) {
   return stream;
 }
 
+constexpr std::uint64_t kWifiJoinTimeoutMs = 15'000;
+constexpr std::uint64_t kRoamingRestartDelayMs = 30'000;
+
 std::uint16_t provisioning_suffix(std::string_view device_id) {
   // IdfBspPlatform::device_id() is derived from the stable Wi-Fi MAC and ends
   // in four hexadecimal characters.  Keep the suffix deterministic without
@@ -508,28 +511,45 @@ RuntimeResult RuntimeCoordinator::connect_if_ready() {
   const auto now_ms = dependencies_.clock.now_ms();
   if (now_ms < next_connect_ms_) return RuntimeResult::success();
   if (!platform_.wifi_connected()) {
+    if (wifi_join_pending_) {
+      if (now_ms < wifi_join_deadline_ms_) return RuntimeResult::success();
+      // The driver accepted the join but no address arrived: the network is
+      // out of range or rejected the credential. Fall back to the next
+      // remembered network instead of retrying this one forever.
+      wifi_join_pending_ = false;
+      (void)roaming_.report_failure();
+    }
     const auto credential = roaming_.next_attempt();
     if (!credential.has_value()) {
+      // Every remembered network failed. Keep the setup AP available, then
+      // walk the list again so a router that returns later is rejoined
+      // without a manual restart.
+      roaming_.reset();
+      next_connect_ms_ = now_ms + kRoamingRestartDelayMs;
       phase_ = RuntimePhase::Provisioning;
       return open_provisioning_ap();
     }
     if (!platform_.wifi_connect(credential->ssid, credential->password)) {
       phase_ = RuntimePhase::Reconnecting;
       next_connect_ms_ = now_ms + reconnect_backoff_.next(50).delay_ms;
-      // Advance to the next remembered network only when the station driver
-      // rejects the join request.  A successful asynchronous join request may
-      // still emit a transient disconnect while scanning/associating; marking
-      // it as a roaming failure here exhausts a one-network journal before the
-      // GOT_IP event and strands the paired runtime in local provisioning.
       (void)roaming_.report_failure();
     } else {
       phase_ = RuntimePhase::Connecting;
+      wifi_join_pending_ = true;
+      wifi_join_ssid_ = credential->ssid;
+      wifi_join_deadline_ms_ = now_ms + kWifiJoinTimeoutMs;
       // The station driver reports readiness asynchronously. Do not add a
       // second backoff delay after a successful join request; the next tick
       // may immediately observe the connected event and send hello.
       next_connect_ms_ = now_ms;
     }
     return RuntimeResult::success();
+  }
+  if (wifi_join_pending_) {
+    // Promote the network that actually produced an address so the next boot
+    // tries it first.
+    wifi_join_pending_ = false;
+    (void)roaming_.report_success(wifi_join_ssid_);
   }
 
   if (transport_.status() == TransportStatus::Live ||

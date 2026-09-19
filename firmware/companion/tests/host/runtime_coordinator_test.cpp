@@ -374,6 +374,55 @@ void test_paired_transport_reconnects_from_provisioning_phase() {
          "paired transport reconnects even when provisioning remains the visible phase");
 }
 
+void test_unreachable_first_network_falls_back_and_promotes_the_joined_one() {
+  FakeClock clock;
+  FakePlatform platform;
+  FakeSlots identity_slots;
+  FakeSlots network_slots;
+  FakeSlots pending_slots;
+  FakeSlots snapshot_slots;
+  DeviceIdentityStore identity(identity_slots);
+  DeviceIdentity identity_value;
+  identity_value.device_id = "device-runtime-test";
+  identity_value.scoped_token = "scoped-runtime-token";
+  identity_value.gateway_url = "http://gateway.local";
+  expect(identity.save(identity_value), "paired identity is available to the roaming test");
+  CredentialStore networks(network_slots);
+  expect(networks.add_or_update("old-office", "old-password").ok &&
+             networks.add_or_update("home-lan", "home-password").ok,
+         "two remembered networks exist, the unreachable one first");
+  PendingCommandStore pending(pending_slots);
+  SnapshotStore snapshots(snapshot_slots);
+  FakeWebSocket websocket;
+  FakeHttp http;
+  FakeTls tls;
+  FixedRuntimeInputQueue input_queue;
+  RuntimeConfig config;
+  config.transport_enabled = true;
+  config.allow_trusted_lan = true;
+  RuntimeDependencies dependencies{clock, platform, identity, networks, pending, snapshots,
+                                    websocket, http, tls, input_queue};
+  RuntimeCoordinator runtime(dependencies, config);
+
+  expect(runtime.boot().ok(), "paired runtime boots with two remembered networks");
+  expect(platform.requested_ssids.size() == 1 && platform.requested_ssids[0] == "old-office",
+         "the first remembered network is attempted first");
+  clock.now += 1'000;
+  expect(runtime.tick().ok() && platform.requested_ssids.size() == 1,
+         "an accepted join is not re-requested while it is still pending");
+  clock.now += 15'000;
+  expect(runtime.tick().ok() && platform.requested_ssids.size() == 2 &&
+             platform.requested_ssids[1] == "home-lan",
+         "a join that never gets an address falls back to the next remembered network");
+  platform.connected = true;
+  expect(runtime.tick().ok(), "station readiness is observed after the fallback join");
+  const auto current = networks.current();
+  expect(current.has_value() && current->ssid == "home-lan",
+         "the network that actually joined is promoted for the next boot");
+  expect(networks.fallback_sequence().front().ssid == "home-lan",
+         "the promoted network is attempted first after a restart");
+}
+
 void test_optional_gateway_submission_and_trusted_lan_origin() {
   FakeClock clock;
   FakePlatform platform;
@@ -418,6 +467,7 @@ int main() {
   test_cached_render_precedes_configured_connect_and_hello_reconcile();
   test_enrollment_offer_displays_pairing_and_reconnects_with_gateway_credential();
   test_paired_transport_reconnects_from_provisioning_phase();
+  test_unreachable_first_network_falls_back_and_promotes_the_joined_one();
   test_optional_gateway_submission_and_trusted_lan_origin();
   if (failures != 0) {
     std::cerr << failures << " runtime coordinator test(s) failed\n";

@@ -92,6 +92,7 @@ class IdfWifiStation {
   bool initialized_ = false;
   bool handlers_registered_ = false;
   bool connected_ = false;
+  bool ap_active_ = false;
 };
 
 /** Strictly bounded HTTP GET adapter for the dedicated snapshot route. */
